@@ -45,13 +45,14 @@ def clean_name(s):
 
 
 if __name__ == '__main__':
-    controller_address = input("TouchWand controller IP address : ")
-    username = input("username: ")
-    password = input("password: ")
+    controller_address = input('TouchWand controller IP address : ')
+    username = input('username: ')
+    password = input('password: ')
 
     # controller_address = "192.168.1.106"
     # username = "techf8dc7a142552"
     # password = "tech"
+    print('Connecting to server to get unit list {} ', controller_address)
     response = get_units(controller_address, username, password)
     data_store = json.loads(response)
 
@@ -62,6 +63,7 @@ if __name__ == '__main__':
     controller_id = controller_address.replace('.', '')
     items_filename = "touchwand" + controller_id + ".items"
     things_filename = "touchwand" + controller_id + ".things"
+
     thing_bridge = thing_bridge_string.format(controller_id, controller_address, username, password)
 
     if Path(items_filename).is_file():
@@ -71,7 +73,9 @@ if __name__ == '__main__':
         os.remove(things_filename)
 
     items_file = open(items_filename, "x", encoding='utf8')
+    print('Creating items file: {} ', items_filename)
     things_file = open(things_filename, "x", encoding='utf8')
+    print('Creating things file: {} ', things_filename)
 
     unit_counter = 0
     for unit in data_store:
@@ -139,3 +143,5 @@ if __name__ == '__main__':
         things_file.write("\r")
     things_file.write("}\r")
     things_file.close()
+
+    print('Done...')
