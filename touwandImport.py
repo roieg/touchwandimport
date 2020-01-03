@@ -1,7 +1,8 @@
 import json
+import os
 import re
 from pathlib import Path
-import os
+
 import requests
 
 ICONS_DICT = dict(Switch="<light>", shutter="<rollershutter>", dimmer="<light>")
@@ -13,7 +14,7 @@ UNIT_ID = dict(Switch="switch", shutter="shutter", dimmer="dimmer")
 
 # filename = "c:\\tmp\\units.json"
 unit_string = "{:<15} {:<20} {:<30} {:<20} {:<20} {:<20} {:<20}"
-thing_string = "Thing {} {} {} [id=\"{}\"]"
+thing_string = "Thing {} {} {}"
 thing_bridge_string = "Bridge touchwand:bridge:{} [ipAddress=\"{}\", username=\"{}\" , password=\"{}\"] "
 channel_string = "channel=\"touchwand:{}:{}:{}:{}\""
 login_url = "http://{}/auth/login?user={}&psw={}"
@@ -92,7 +93,7 @@ if __name__ == '__main__':
 
             item = unit_string.format(unit_type, variable_name, unit_name, icon,
                                       group_name, unit_tag, channel)
-            thing = thing_string.format(uid, unit_id, unit_name, unit_id)
+            thing = thing_string.format(uid, unit_id, unit_name)
             if unit["type"] == "Switch":
                 Switches.append(item)
                 things_switches.append(thing)
