@@ -5,12 +5,12 @@ from pathlib import Path
 
 import requests
 
-ICONS_DICT = dict(Switch="<light>", shutter="<rollershutter>", dimmer="<light>")
-TYPE_DICT = dict(Switch="Switch", shutter="Rollershutter", dimmer="Dimmer")
-TAG_DICT = dict(Switch="[\"Lighting\"]", dimmer="[\"Lighting\"]", shutter="[\"Shutter\"]")
-GROUPS_DICT = dict(Switch="gLights", shutter="gShutters", dimmer="gLights")
-CHANNEL_DICT = dict(Switch="switch", shutter="shutter", dimmer="brightness")
-UNIT_ID = dict(Switch="switch", shutter="shutter", dimmer="dimmer")
+ICONS_DICT = dict(Switch="<light>", shutter="<rollershutter>", dimmer="<light>" , AlarmSensor="<motion>")
+TYPE_DICT = dict(Switch="Switch", shutter="Rollershutter", dimmer="Dimmer", AlarmSensor="AlarmSensor")
+TAG_DICT = dict(Switch="[\"Lighting\"]", dimmer="[\"Lighting\"]", shutter="[\"Shutter\"]", AlarmSensor="[\"\"]" )
+GROUPS_DICT = dict(Switch="gLights", shutter="gShutters", dimmer="gLights", AlarmSensor="gSensors")
+CHANNEL_DICT = dict(Switch="switch", shutter="shutter", dimmer="brightness", AlarmSensor="alarm")
+UNIT_ID = dict(Switch="switch", shutter="shutter", dimmer="dimmer", AlarmSensor="AlarmSensor")
 
 # filename = "c:\\tmp\\units.json"
 unit_string = "{:<15} {:<20} {:<30} {:<20} {:<20} {:<20} {:<20}"
@@ -21,10 +21,12 @@ login_url = "http://{}/auth/login?user={}&psw={}"
 list_units_url = "http://{}/units/listUnits"
 Shutter = []
 Switches = []
+AlarmSensor = []
 Wall_Controllers = []
 things_shutters = []
 things_switches = []
 things_wall_controllers = []
+things_alarmsensors = []
 
 
 def get_units(ip, user, passwd):
@@ -49,18 +51,41 @@ if __name__ == '__main__':
     username = input('username: ')
     password = input('password: ')
 
-    # controller_address = "192.168.1.106"
-    # username = "techf8dc7a142552"
-    # password = "tech"
-    print('Connecting to server to get unit list {} ', controller_address)
+#    controller_address = "192.168.1.105"
+#    username = ""
+#    password = "tech"
+    
+    controller_id = controller_address.replace('.', '')
+    
+    print('Connecting server {} to get units list '.format(controller_address))
     response = get_units(controller_address, username, password)
     data_store = json.loads(response)
+    
+    units_filename = "units" + controller_id + ".json"
+    print('Creating units json file: ', units_filename)
 
+    jsonfile = open(units_filename,"w+", encoding='utf8')           
+    jsonfile.write(json.dumps(data_store, indent=4, sort_keys=True))
+    jsonfile.close()
+
+    sensors_filename = "sensors_" + controller_id + ".json"
+    print('Creating sensors json file: ', sensors_filename)
+    
+    sensorsJsonFile = open(sensors_filename,"w+", encoding='utf8')    
+    sensorsJsonFile.write("[\r\n")
+    for unit in data_store:
+        if unit["type"] == 'AlarmSensor':
+            sensorsJsonFile.write(json.dumps(unit, indent=4, sort_keys=True))
+            sensorsJsonFile.write(",\r\n")
+    
+    sensorsJsonFile.write("\r\n]")
+    sensorsJsonFile.close()
+        
     #    if filename:
     #        with open(filename, 'r', encoding='utf8') as file:
     #            data_store = json.load(file)
 
-    controller_id = controller_address.replace('.', '')
+    
     items_filename = "touchwand" + controller_id + ".items"
     things_filename = "touchwand" + controller_id + ".things"
 
@@ -73,9 +98,9 @@ if __name__ == '__main__':
         os.remove(things_filename)
 
     items_file = open(items_filename, "x", encoding='utf8')
-    print('Creating items file: {} ', items_filename)
+    print('Creating items file: ', items_filename)
     things_file = open(things_filename, "x", encoding='utf8')
-    print('Creating things file: {} ', things_filename)
+    print('Creating things file: ', things_filename)
 
     unit_counter = 0
     for unit in data_store:
@@ -110,6 +135,9 @@ if __name__ == '__main__':
             if unit["type"] == 'dimmer':
                 Switches.append(item)
                 things_switches.append(thing)
+            if unit["type"] == 'AlarmSensor':
+                AlarmSensor.append(item)
+                things_alarmsensors.append(thing)
 
     items_file.write("/* Shutters */\r\r\r")
     for item in Shutter:
@@ -125,6 +153,11 @@ if __name__ == '__main__':
     for item in Wall_Controllers:
         items_file.write(item)
         items_file.write("\r")
+        
+    items_file.write("\r\r\r/* Alarm Sensors */\r\r\r")
+    for item in AlarmSensor:
+        items_file.write(item)
+        items_file.write("\r")        
 
     items_file.close()
 
@@ -141,6 +174,11 @@ if __name__ == '__main__':
     for thing in things_wall_controllers:
         things_file.write(thing)
         things_file.write("\r")
+        
+    for thing in things_alarmsensors:
+        things_file.write(thing)
+        things_file.write("\r")    
+        
     things_file.write("}\r")
     things_file.close()
 
