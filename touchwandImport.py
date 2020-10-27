@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 #    controller_address = "192.168.1.105"
 #    username = ""
-#    password = "tech"
+#    password = ""
     
     controller_id = controller_address.replace('.', '')
     
