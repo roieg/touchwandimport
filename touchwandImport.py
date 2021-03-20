@@ -50,6 +50,7 @@ if __name__ == '__main__':
     controller_address = input('TouchWand controller IP address : ')
     username = input('username: ')
     password = input('password: ')
+    bridgeId = input('bridge Id: ')
 
 #    controller_address = "192.168.1.105"
 #    username = ""
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     items_filename = "touchwand" + controller_id + ".items"
     things_filename = "touchwand" + controller_id + ".things"
 
-    thing_bridge = thing_bridge_string.format(controller_id, controller_address, username, password)
+    thing_bridge = thing_bridge_string.format(bridgeId, controller_address, username, password)
 
     if Path(items_filename).is_file():
         os.remove(items_filename)
@@ -117,7 +118,7 @@ if __name__ == '__main__':
             unit_tag = TAG_DICT[unit["type"]]
             uid = UNIT_ID[unit["type"]]
             unit_id = unit["id"]
-            channel = "{" + channel_string.format(uid, controller_id, unit_id,
+            channel = "{" + channel_string.format(uid, bridgeId, unit_id,
                                                   CHANNEL_DICT[unit["type"]]) + "}"
 
             item = unit_string.format(unit_type, variable_name, unit_name, icon,
